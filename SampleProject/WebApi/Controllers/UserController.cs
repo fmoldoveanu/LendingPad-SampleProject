@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using BusinessEntities;
@@ -28,7 +29,13 @@ namespace WebApi.Controllers
         [HttpPost]
         public HttpResponseMessage CreateUser(Guid userId, [FromBody] UserModel model)
         {
-            var user = _createUserService.Create(userId, model.Name, model.Email, model.Type, model.AnnualSalary, model.Tags);
+
+            var user = _createUserService.Create(userId, model.Name, model.Email, model.Age, model.Type, model.AnnualSalary, model.Tags);
+            if (user == null) 
+            {
+                return Request.CreateResponse(HttpStatusCode.Conflict,
+                    $"User with ID {userId} already exists.");
+            }
             return Found(new UserData(user));
         }
 
@@ -41,7 +48,12 @@ namespace WebApi.Controllers
             {
                 return DoesNotExist();
             }
-            _updateUserService.Update(user, model.Name, model.Email, model.Type, model.AnnualSalary, model.Tags);
+            string ret = _updateUserService.Update(user, model.Name, model.Email, model.Age, model.Type, model.AnnualSalary, model.Tags);
+            if (ret.Length > 0)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest,
+                    ret);
+            }
             return Found(new UserData(user));
         }
 
@@ -63,6 +75,10 @@ namespace WebApi.Controllers
         public HttpResponseMessage GetUser(Guid userId)
         {
             var user = _getUserService.GetUser(userId);
+            if (user == null)
+            {
+                return DoesNotExist();
+            }
             return Found(new UserData(user));
         }
 

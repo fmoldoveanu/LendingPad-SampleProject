@@ -10,7 +10,7 @@ namespace WebApi.Models
             Id = id;
         }
 
-        public IdObjectData(IdObject entity) : this(entity.Id)
+        public IdObjectData(IdObject entity) : this(entity != null ? entity.Id : Guid.Empty)
         {
         }
 

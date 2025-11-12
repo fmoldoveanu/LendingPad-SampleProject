@@ -7,13 +7,24 @@ namespace Core.Services.Users
     [AutoRegister(AutoRegisterTypes.Singleton)]
     public class UpdateUserService : IUpdateUserService
     {
-        public void Update(User user, string name, string email, UserTypes type, decimal? annualSalary, IEnumerable<string> tags)
+        public string Update(User user, string name, string email, int age, UserTypes type, decimal? annualSalary, IEnumerable<string> tags)
         {
-            user.SetEmail(email);
-            user.SetName(name);
-            user.SetType(type);
-            user.SetMonthlySalary(annualSalary.Value / 12);
+            string ret = "";
+            ret += user.SetEmail(email);
+            ret += user.SetName(name);
+            ret += user.SetAge(age);
+            ret += user.SetType(type);
+
             user.SetTags(tags);
+            if (annualSalary != null)
+            {
+                user.SetMonthlySalary(annualSalary.Value / 12);
+            }
+            else
+            {
+                user.SetMonthlySalary(0);
+            }
+            return ret;
         }
     }
 }

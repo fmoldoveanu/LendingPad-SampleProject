@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Filters;
-using Raven.Client;
+//using Raven.Client;
 
 namespace WebApi.App_Start
 {
@@ -15,8 +16,15 @@ namespace WebApi.App_Start
             var method = actionExecutedContext.Request.Method;
             if (method == HttpMethod.Post || method == HttpMethod.Put || method == HttpMethod.Delete)
             {
-                var session = (IDocumentSession)container.GetService(typeof(IDocumentSession));
-                session.SaveChanges();
+                // Only proceed if there is a response and it's 200 OK
+                if (actionExecutedContext.Response != null &&
+                    actionExecutedContext.Response.StatusCode == HttpStatusCode.OK)
+                {
+                    //moot point for in memory
+                    //var session = (IDocumentSession)container.GetService(typeof(IDocumentSession));
+                    //session.SaveChanges();
+                }
+
             }
         }
     }

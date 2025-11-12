@@ -9,7 +9,7 @@ using Data.Indexes;
 namespace Data.Repositories
 {
     [AutoRegister]
-    public class UserRepository : Repository<User>, IUserRepository
+    public class ProductRepository : Repository<Product>, IProductRepository
     {
         /*
         private readonly IDocumentSession _documentSession;
@@ -60,19 +60,21 @@ namespace Data.Repositories
         }
     }
     */
-        public IEnumerable<User> Get(UserTypes? userType = null, string name = null, string email = null)
+
+        public IEnumerable<Product> Get(string name = null, decimal price = 0, int quantity = 0)
         {
             var query = Store.Values.AsQueryable();
 
-            if (userType != null)
-                query = query.Where(u => u.Type == userType);
 
             if (!string.IsNullOrEmpty(name))
                 query = query.Where(u => u.Name != null && u.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0);
 
 
-            if (!string.IsNullOrEmpty(email))
-                query = query.Where(u => u.Email != null && u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+            if (price > 0)
+                query = query.Where(u => u.Price > 0 && u.Price == price);
+
+            if (quantity > 0)
+                query = query.Where(u => u.Quantity > 0 && u.Quantity == quantity);
 
             return query.ToList();
         }

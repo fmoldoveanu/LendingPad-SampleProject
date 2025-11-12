@@ -7,11 +7,11 @@ using Data.Repositories;
 namespace Core.Services.Users
 {
     [AutoRegister]
-    public class GetUserService : IGetUserService
+    public class GetProductService : IGetUserService
     {
         private readonly IUserRepository _userRepository;
 
-        public GetUserService(IUserRepository userRepository)
+        public GetProductService(IUserRepository userRepository)
         {
             _userRepository = userRepository;
         }

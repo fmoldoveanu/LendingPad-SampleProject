@@ -43,38 +43,50 @@ namespace BusinessEntities
             private set => _age = value;
         }
 
-        public IEnumerable<string> Tags
+        public List<string> Tags
         {
             get => _tags;
             private set => _tags.Initialize(value);
         }
 
-        public void SetName(string name)
+        public string SetName(string name)
         {
             if (string.IsNullOrEmpty(name))
             {
-                throw new ArgumentNullException("Name was not provided.");
+                return "Name was not provided.";
             }
             _name = name;
+            return "";
         }
 
-        public void SetEmail(string email)
+        public string SetEmail(string email)
         {
             if (string.IsNullOrEmpty(email))
             {
-                throw new ArgumentNullException("Name was not provided.");
+                return "Email was not provided.";
             }
             _email = email;
+            return "";
         }
 
-        public void SetType(UserTypes type)
+        public string SetType(UserTypes type)
         {
+            if (!Enum.IsDefined(typeof(UserTypes), type))
+            {
+                return "Invalid user type.";
+            }
             _type = type;
+            return "";
         }
 
-        public void SetAge(int age)
+        public string SetAge(int age)
         {
-            _email = _name;
+            if (age < 0)
+            {
+                return "Age cannot be negative.";
+            }
+            _age = age;
+            return "";
         }
 
         public void SetMonthlySalary(decimal? monthlySalary)

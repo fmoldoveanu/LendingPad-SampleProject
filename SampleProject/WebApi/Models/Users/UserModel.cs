@@ -7,8 +7,9 @@ namespace WebApi.Models.Users
     {
         public string Name { get; set; }
         public string Email { get; set; }
+        public int Age { get; set; }
         public UserTypes Type { get; set; }
         public decimal? AnnualSalary { get; set; }
-        public IEnumerable<string> Tags { get; set; }
+        public List<string> Tags { get; set; }
     }
 }
