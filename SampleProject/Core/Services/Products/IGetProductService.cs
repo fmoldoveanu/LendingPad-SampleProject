@@ -6,8 +6,8 @@ namespace Core.Services.Products
 {
     public interface IGetProductService
     {
-        BusinessEntities.Product GetProduct(Guid id);
+        Product GetProduct(Guid id);
 
-        IEnumerable<BusinessEntities.Product> GetProducts(string name = null, decimal price = 0, int quantity = 0);
+        IEnumerable<Product> GetProducts(string name = null, decimal? price = null, int? quantity = null);
     }
 }

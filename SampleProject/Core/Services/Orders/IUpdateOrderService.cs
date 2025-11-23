@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using BusinessEntities;
+using Common.Results;
 
 namespace Core.Services.Orders
 {
     public interface IUpdateOrderService
     {
-        string Update(BusinessEntities.Order order, DateTime orderDate, Guid customerId, decimal totalAmount);
+        Result<Order> Update(Order order, DateTime orderDate, Guid customerId, decimal totalAmount);
     }
 }

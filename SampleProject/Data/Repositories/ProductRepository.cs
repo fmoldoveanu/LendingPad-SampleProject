@@ -4,62 +4,58 @@ using System.Linq;
 using BusinessEntities;
 using Common;
 using Data.Indexes;
-//using Raven.Client;
+using Raven.Client;
 
 namespace Data.Repositories
 {
     [AutoRegister]
     public class ProductRepository : Repository<Product>, IProductRepository
     {
-        /*
+        
         private readonly IDocumentSession _documentSession;
 
-        public UserRepository(IDocumentSession documentSession) : base(documentSession)
+        public ProductRepository(IDocumentSession documentSession) : base(documentSession)
         {
             _documentSession = documentSession;
         }
 
-        public IEnumerable<User> Get(UserTypes? userType = null, string name = null, string email = null)
+        public IEnumerable<Product> Get(string name = null, decimal? price = null, int? quantity = null)
         {
-            var query = _documentSession.Advanced.DocumentQuery<User, UsersListIndex>();
-
+            var query = _documentSession.Advanced.DocumentQuery<Product, ProductListIndex>();
             var hasFirstParameter = false;
-            if (userType != null)
-            {
-                query = query.WhereEquals("Type", (int)userType);
-                hasFirstParameter = true;
-            }
 
             if (name != null)
             {
-                if (hasFirstParameter)
-                {
-                    query = query.AndAlso();
-                }
-                else
-                {
-                    hasFirstParameter = true;
-                }
-                query = query.Where($"Name:*{name}*");
+                query = query.WhereEquals("Name", name); // strict match
+                hasFirstParameter = true;
             }
 
-            if (email != null)
+            if (price != null)
             {
                 if (hasFirstParameter)
-                {
                     query = query.AndAlso();
-                }
-                query = query.WhereEquals("Email", email);
+
+                query = query.WhereEquals("Price", price.ToString()); // cast if stored as string
+                hasFirstParameter = true;
             }
+
+            if (quantity != null)
+            {
+                if (hasFirstParameter)
+                    query = query.AndAlso();
+
+                query = query.WhereEquals("Quantity", quantity.ToString()); // cast if stored as string
+            }
+
             return query.ToList();
         }
 
         public void DeleteAll()
         {
-            base.DeleteAll<UsersListIndex>();
+            base.DeleteAll<ProductListIndex>();
         }
     }
-    */
+    /*
 
         public IEnumerable<Product> Get(string name = null, decimal price = 0, int quantity = 0)
         {
@@ -84,4 +80,5 @@ namespace Data.Repositories
             base.DeleteAll();
         }
     }
+    */
 }

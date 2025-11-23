@@ -1,23 +1,38 @@
-﻿using BusinessEntities;
+﻿using System;
+using BusinessEntities;
 using Common;
-using Core.Services.Products;
+using Common.Results;
 using Data.Repositories;
 
-namespace Core.Services.Product
+namespace Core.Services.Products
 {
-    [AutoRegister]
+    [AutoRegister(AutoRegisterTypes.Scope)]
     public class DeleteProductService : IDeleteProductService
     {
-        private IProductRepository _productRepository;
+        private readonly IProductRepository _productRepository;
 
         public DeleteProductService(IProductRepository productRepository)
         {
             _productRepository = productRepository;
         }
 
-        public void Delete(BusinessEntities.Product product)
+        public Result<Product> DeleteById(Guid id)
         {
+            var product = _productRepository.Get(id);
+            if (product == null)
+                return Result<Product>.Fail("Product not found.");
+
             _productRepository.Delete(product);
+            return Result<Product>.Ok(product);
+        }
+
+        public Result<Product> Delete(Product product)
+        {
+            if (product == null)
+                return Result<Product>.Fail("Product cannot be null.");
+
+            _productRepository.Delete(product);
+            return Result<Product>.Ok(product);
         }
 
         public void DeleteAll()

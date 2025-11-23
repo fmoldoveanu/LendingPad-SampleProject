@@ -1,10 +1,13 @@
-﻿using BusinessEntities;
+﻿using System;
+using BusinessEntities;
+using Common.Results;
 
 namespace Core.Services.Orders
 {
     public interface IDeleteOrderService
     {
-        void Delete(BusinessEntities.Order order);
+        Result<Order> DeleteById(Guid id);
+        Result<Order> Delete(Order order);
         void DeleteAll();
     }
 }

@@ -6,12 +6,12 @@ using Data.Repositories;
 
 namespace Core.Services.Users
 {
-    [AutoRegister]
-    public class GetProductService : IGetUserService
+    [AutoRegister(AutoRegisterTypes.Scope)]
+    public class GetUserService : IGetUserService
     {
         private readonly IUserRepository _userRepository;
 
-        public GetProductService(IUserRepository userRepository)
+        public GetUserService(IUserRepository userRepository)
         {
             _userRepository = userRepository;
         }

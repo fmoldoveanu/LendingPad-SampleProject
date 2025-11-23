@@ -25,80 +25,85 @@ namespace WebApi.Controllers
             _updateProductService = updateProductService;
         }
 
-        [Route("{productId:guid}/create")]
+        // Create product (POST /products)
         [HttpPost]
-        public HttpResponseMessage CreateProduct(Guid productId, [FromBody] ProductModel model)
+        [Route("")]
+        public HttpResponseMessage CreateProduct([FromBody] ProductModel model)
         {
+            var result = _createProductService.Create(model.Name, model.Price, model.Quantity);
 
-            var product = _createProductService.Create(productId, model.Name, model.Price, model.Quantity);
-            if (product == null) 
-            {
-                return Request.CreateResponse(HttpStatusCode.Conflict,
-                    $"Product with ID {productId} already exists.");
-            }
-            return Found(new ProductData(product));
+            if (!result.Success)
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { errors = result.Errors });
+
+            return Request.CreateResponse(HttpStatusCode.Created, new ProductData(result.Value));
         }
 
-        [Route("{productId:guid}/update")]
-        [HttpPost]
+        // Update product (PUT /products/{id})
+        [HttpPut]
+        [Route("{productId:guid}")]
         public HttpResponseMessage UpdateProduct(Guid productId, [FromBody] ProductModel model)
         {
             var product = _getProductService.GetProduct(productId);
             if (product == null)
-            {
                 return DoesNotExist();
-            }
-            string ret = _updateProductService.Update(product, model.Name, model.Price, model.Quantity);
-            if (ret.Length > 0)
-            {
-                return Request.CreateResponse(HttpStatusCode.BadRequest,
-                    ret);
-            }
-            return Found(new ProductData(product));
+
+            var result = _updateProductService.Update(product, model.Name, model.Price, model.Quantity);
+
+            if (!result.Success)
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { errors = result.Errors });
+
+            return Request.CreateResponse(HttpStatusCode.OK, new ProductData(result.Value));
         }
 
-        [Route("{productId:guid}/delete")]
+        // Delete product (DELETE /products/{id})
         [HttpDelete]
+        [Route("{productId:guid}")]
         public HttpResponseMessage DeleteProduct(Guid productId)
         {
-            var product = _getProductService.GetProduct(productId);
-            if (product == null)
-            {
+            var result = _deleteProductService.DeleteById(productId);
+            if (!result.Success)
                 return DoesNotExist();
-            }
-            _deleteProductService.Delete(product);
-            return Found();
+
+            return Request.CreateResponse(HttpStatusCode.NoContent);
         }
 
-        [Route("{productId:guid}")]
+        // Get single product (GET /products/{id})
         [HttpGet]
+        [Route("{productId:guid}")]
         public HttpResponseMessage GetProduct(Guid productId)
         {
             var product = _getProductService.GetProduct(productId);
             if (product == null)
-            {
                 return DoesNotExist();
-            }
-            return Found(new ProductData(product));
+
+            return Request.CreateResponse(HttpStatusCode.OK, new ProductData(product));
         }
 
-        [Route("list")]
+        // Get products list (GET /products/list?skip=0&take=50&name=...&price=...&quantity=...)
         [HttpGet]
-        public HttpResponseMessage GetProducts(int skip, int take, string name = null, decimal? price = null, int? quantity = null)
+        [Route("list")]
+        public HttpResponseMessage GetProducts(int skip = 0, int take = 50, string name = null, decimal? price = null, int? quantity = null)
         {
-            var users = _getProductService.GetProducts(name)
-                                       .Skip(skip).Take(take)
-                                       .Select(q => new ProductData(q))
-                                       .ToList();
-            return Found(users);
+            if (take > 100) take = 100;
+
+            var products = _getProductService.GetProducts(name, price, quantity)
+                                             .Skip(skip).Take(take)
+                                             .Select(p => new ProductData(p))
+                                             .ToList();
+
+            return Request.CreateResponse(HttpStatusCode.OK, products);
         }
 
-        [Route("clear")]
+        // Delete all products (DELETE /products/clear)
         [HttpDelete]
-        public HttpResponseMessage DeleteAllProducts()
+        [Route("clear")]
+        public HttpResponseMessage DeleteAllProducts([FromUri] bool confirm = false)
         {
+            if (!confirm)
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { error = "Confirmation required" });
+
             _deleteProductService.DeleteAll();
-            return Found();
+            return Request.CreateResponse(HttpStatusCode.NoContent);
         }
     }
 }

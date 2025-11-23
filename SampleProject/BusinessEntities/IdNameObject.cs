@@ -9,16 +9,15 @@ namespace BusinessEntities
         public string Name
         {
             get => _name;
-            private set => _name = value;
+            private set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Name must be provided.", nameof(Name));
+
+                _name = value.Trim();
+            }
         }
 
-        public void SetName(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentNullException("Name was not provided.");
-            }
-            _name = name;
-        }
+        public void SetName(string name) => Name = name;
     }
 }

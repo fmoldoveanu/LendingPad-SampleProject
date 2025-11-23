@@ -1,22 +1,43 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using BusinessEntities;
 using Common;
-using Core.Services.Products;
+using Common.Results;
+using Data.Repositories;
 
-namespace Core.Services.Users
+namespace Core.Services.Products
 {
-    [AutoRegister(AutoRegisterTypes.Singleton)]
+    [AutoRegister(AutoRegisterTypes.Scope)]
     public class UpdateProductService : IUpdateProductService
     {
-        public string Update(BusinessEntities.Product product, string name, decimal price, int quantity)
+        private readonly IProductRepository _productRepository;
+
+        public UpdateProductService(IProductRepository productRepository)
         {
-            string ret = "";
-            ret += product.SetName(name);
-            ret += product.SetPrice(price);
-            ret += product.SetQuantity(quantity);
+            _productRepository = productRepository;
+        }
 
+        public Result<Product> Update(Product product, string name, decimal price, int quantity)
+        {
+            var errors = new List<string>();
 
-            return ret;
+            try { product.SetName(name); }
+            catch (Exception ex) { errors.Add(ex.Message); }
+
+            try { product.SetPrice(price); }
+            catch (Exception ex) { errors.Add(ex.Message); }
+
+            try { product.SetQuantity(quantity); }
+            catch (Exception ex) { errors.Add(ex.Message); }
+
+            if (errors.Any())
+                return Result<Product>.Fail(errors.ToArray());
+
+            // Persist changes
+            _productRepository.Save(product);
+
+            return Result<Product>.Ok(product);
         }
     }
 }

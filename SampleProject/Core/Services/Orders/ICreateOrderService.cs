@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using BusinessEntities;
+using Common.Results;
 
 namespace Core.Services.Orders
 {
     public interface ICreateOrderService
     {
-        BusinessEntities.Order Create(Guid id, DateTime dateTime, Guid customerId, decimal totalAmount);
+        Result<Order> Create(DateTime orderDate, Guid customerId, decimal totalAmount);
     }
 }

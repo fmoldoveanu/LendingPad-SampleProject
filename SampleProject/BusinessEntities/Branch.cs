@@ -29,5 +29,8 @@ namespace BusinessEntities
         {
             _members.Initialize(members.Where(q => q.Type == UserTypes.Employee));
         }
+
+        public IReadOnlyCollection<User> Members => _members.AsReadOnly();
+
     }
 }

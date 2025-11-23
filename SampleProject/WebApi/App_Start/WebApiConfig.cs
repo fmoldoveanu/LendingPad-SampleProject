@@ -32,7 +32,7 @@ namespace WebApi
             container.Verify();
 
             config.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(container);
-            GlobalConfiguration.Configuration.DependencyResolver = config.DependencyResolver;
+            //GlobalConfiguration.Configuration.DependencyResolver = config.DependencyResolver;  //redundant
 
             var settings = config.Formatters.JsonFormatter.SerializerSettings;
             settings.ContractResolver = new CamelCasePropertyNamesContractResolver();

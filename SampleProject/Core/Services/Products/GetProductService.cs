@@ -6,7 +6,7 @@ using Data.Repositories;
 
 namespace Core.Services.Products
 {
-    [AutoRegister]
+    [AutoRegister(AutoRegisterTypes.Scope)]
     public class GetProductService : IGetProductService
     {
         private readonly IProductRepository _productRepository;
@@ -16,12 +16,12 @@ namespace Core.Services.Products
             _productRepository = productRepository;
         }
 
-        public BusinessEntities.Product GetProduct(Guid id)
+        public Product GetProduct(Guid id)
         {
             return _productRepository.Get(id);
         }
 
-        public IEnumerable<BusinessEntities.Product> GetProducts(string name = null, decimal price = 0, int quantity=0)
+        public IEnumerable<Product> GetProducts(string name = null, decimal? price = null, int? quantity = null)
         {
             return _productRepository.Get(name, price, quantity);
         }

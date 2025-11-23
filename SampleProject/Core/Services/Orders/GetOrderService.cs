@@ -6,7 +6,7 @@ using Data.Repositories;
 
 namespace Core.Services.Orders
 {
-    [AutoRegister]
+    [AutoRegister(AutoRegisterTypes.Scope)]
     public class GetOrderService : IGetOrderService
     {
         private readonly IOrderRepository _orderRepository;
@@ -16,12 +16,12 @@ namespace Core.Services.Orders
             _orderRepository = orderRepository;
         }
 
-        public BusinessEntities.Order GetOrder(Guid id)
+        public Order GetOrder(Guid id)
         {
             return _orderRepository.Get(id);
         }
 
-        public IEnumerable<BusinessEntities.Order> GetOrders(DateTime? orderDate = null, Guid? customerId = null, decimal totalAmount=0)
+        public IEnumerable<Order> GetOrders(DateTime? orderDate = null, Guid? customerId = null, decimal? totalAmount = null)
         {
             return _orderRepository.Get(orderDate, customerId, totalAmount);
         }

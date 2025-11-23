@@ -4,62 +4,62 @@ using System.Linq;
 using BusinessEntities;
 using Common;
 using Data.Indexes;
-//using Raven.Client;
+using Raven.Client;
 
 namespace Data.Repositories
 {
     [AutoRegister]
     public class OrderRepository : Repository<Order>, IOrderRepository
     {
-        /*
+        
         private readonly IDocumentSession _documentSession;
 
-        public UserRepository(IDocumentSession documentSession) : base(documentSession)
+        public OrderRepository(IDocumentSession documentSession) : base(documentSession)
         {
             _documentSession = documentSession;
         }
 
-        public IEnumerable<User> Get(UserTypes? userType = null, string name = null, string email = null)
+        public IEnumerable<Order> Get(DateTime? orderDate = null, Guid? customerId = null, decimal? totalAmount = null)
         {
-            var query = _documentSession.Advanced.DocumentQuery<User, UsersListIndex>();
-
+            var query = _documentSession.Advanced.DocumentQuery<Order, OrderListIndex>();
             var hasFirstParameter = false;
-            if (userType != null)
+
+            if (orderDate != null)
             {
-                query = query.WhereEquals("Type", (int)userType);
+                var start = orderDate.Value.Date;
+                var end = start.AddDays(1);
+
+                query = query.WhereBetween("OrderDate", start, end);
                 hasFirstParameter = true;
             }
 
-            if (name != null)
+            if (customerId != null)
             {
                 if (hasFirstParameter)
-                {
                     query = query.AndAlso();
-                }
-                else
-                {
-                    hasFirstParameter = true;
-                }
-                query = query.Where($"Name:*{name}*");
+
+                query = query.WhereEquals("CustomerId", customerId.Value.ToString());
+                hasFirstParameter = true;
             }
 
-            if (email != null)
+            if (totalAmount != null)
             {
                 if (hasFirstParameter)
-                {
                     query = query.AndAlso();
-                }
-                query = query.WhereEquals("Email", email);
+
+                query = query.Where($"TotalAmount:{totalAmount.Value}*");
             }
+
             return query.ToList();
         }
 
+
         public void DeleteAll()
         {
-            base.DeleteAll<UsersListIndex>();
+            base.DeleteAll<OrderListIndex>();
         }
     }
-    */
+   /*
         public IEnumerable<Order> Get(DateTime? orderDate = null, Guid? customerId = null, decimal totalAmount = 0)
         {
             var query = Store.Values.AsQueryable();
@@ -83,4 +83,5 @@ namespace Data.Repositories
             base.DeleteAll();
         }
     }
+    */
 }

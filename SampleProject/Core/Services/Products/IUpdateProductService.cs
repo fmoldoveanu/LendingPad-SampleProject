@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using BusinessEntities;
+﻿using BusinessEntities;
+using Common.Results;
 
 namespace Core.Services.Products
 {
     public interface IUpdateProductService
     {
-        string Update(BusinessEntities.Product product, string name, decimal price, int quantity);
+        Result<Product> Update(Product product, string name, decimal price, int quantity);
     }
 }

@@ -2,35 +2,70 @@
 using System.Collections.Generic;
 using BusinessEntities;
 using Common;
+using Common.Results;
 using Core.Factories;
 using Data.Repositories;
 
 namespace Core.Services.Users
 {
-    [AutoRegister]
+    [AutoRegister(AutoRegisterTypes.Scope)]
     public class CreateUserService : ICreateUserService
     {
-        private readonly IUpdateUserService _updateUserService;
         private readonly IIdObjectFactory<User> _userFactory;
         private readonly IUserRepository _userRepository;
 
-        public CreateUserService(IIdObjectFactory<User> userFactory, IUserRepository userRepository, IUpdateUserService updateUserService)
+        public CreateUserService(IIdObjectFactory<User> userFactory, IUserRepository userRepository)
         {
-            _userFactory = userFactory;
-            _userRepository = userRepository;
-            _updateUserService = updateUserService;
+            _userFactory = userFactory ?? throw new ArgumentNullException(nameof(userFactory));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
-        public User Create(Guid id, string name, string email, int age, UserTypes type, decimal? annualSalary, IEnumerable<string> tags)
+        // Modern route: generates a new Guid
+        public Result<User> Create(string name, string email, int age, UserTypes type, decimal? monthlySalary, IEnumerable<string> tags)
         {
-            var existing = _userRepository.Get(id);
-            if (existing != null)
-                return null;
+            var id = Guid.NewGuid();
+            return CreateInternal(id, name, email, age, type, monthlySalary, tags);
+        }
+
+        // Legacy route: uses provided Guid
+        public Result<User> CreateLegacy(Guid userId, string name, string email, int age, UserTypes type, decimal? monthlySalary, IEnumerable<string> tags)
+        {
+            return CreateInternal(userId, name, email, age, type, monthlySalary, tags);
+        }
+
+        // Shared private helper
+        private Result<User> CreateInternal(Guid id, string name, string email, int age, UserTypes type, decimal? monthlySalary, IEnumerable<string> tags)
+        {
+            // Check for duplicate ID
+            if (_userRepository.Get(id) != null)
+                return Result<User>.Fail($"User with ID {id} already exists.");
 
             var user = _userFactory.Create(id);
-            _updateUserService.Update(user, name, email, age, type, annualSalary, tags);
-            _userRepository.Save(user);
-            return user;
+
+            try
+            {
+                user.SetName(name);
+                user.SetEmail(email);
+                user.SetAge(age);
+                user.SetType(type);
+                user.SetMonthlySalary(monthlySalary);
+                user.SetTags(tags);
+            }
+            catch (Exception ex)
+            {
+                return Result<User>.Fail($"Validation failed: {ex.Message}");
+            }
+
+            try
+            {
+                _userRepository.Save(user);
+            }
+            catch (Exception ex)
+            {
+                return Result<User>.Fail($"Persistence failed: {ex.Message}");
+            }
+
+            return Result<User>.Ok(user);
         }
     }
 }

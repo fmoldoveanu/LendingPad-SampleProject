@@ -1,23 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BusinessEntities;
 using Common;
-using Core.Services.Products;
+using Common.Results;
+using Data.Repositories;
 
 namespace Core.Services.Orders
 {
-    [AutoRegister(AutoRegisterTypes.Singleton)]
+    [AutoRegister(AutoRegisterTypes.Scope)]
     public class UpdateOrderService : IUpdateOrderService
     {
-        public string Update(BusinessEntities.Order order, DateTime orderDate, Guid customerId, decimal totalAmount)
+        private readonly IOrderRepository _orderRepository;
+
+        public UpdateOrderService(IOrderRepository orderRepository)
         {
-            string ret = "";
-            ret += order.SetOrderDate(orderDate);
-            ret += order.SetCustomerId(customerId);
-            ret += order.SetTotalAmount(totalAmount);
+            _orderRepository = orderRepository;
+        }
 
+        public Result<Order> Update(Order order, DateTime orderDate, Guid customerId, decimal totalAmount)
+        {
+            var errors = new List<string>();
 
-            return ret;
+            try { order.SetOrderDate(orderDate); }
+            catch (Exception ex) { errors.Add(ex.Message); }
+
+            try { order.SetCustomerId(customerId); }
+            catch (Exception ex) { errors.Add(ex.Message); }
+
+            try { order.SetTotalAmount(totalAmount); }
+            catch (Exception ex) { errors.Add(ex.Message); }
+
+            if (errors.Any())
+                return Result<Order>.Fail(errors.ToArray());
+
+            // Persist changes
+            _orderRepository.Save(order);
+
+            return Result<Order>.Ok(order);
         }
     }
 }

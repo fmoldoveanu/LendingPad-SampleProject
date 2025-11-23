@@ -1,36 +1,45 @@
 ﻿using System;
-using System.Collections.Generic;
 using BusinessEntities;
 using Common;
+using Common.Results;
 using Core.Factories;
 using Data.Repositories;
 
 namespace Core.Services.Products
 {
-    [AutoRegister]
+    [AutoRegister(AutoRegisterTypes.Scope)]
     public class CreateProductService : ICreateProductService
     {
-        private readonly IUpdateProductService _updateProductService;
-        private readonly IIdObjectFactory<BusinessEntities.Product> _productFactory;
+        private readonly IIdObjectFactory<Product> _productFactory;
         private readonly IProductRepository _productRepository;
 
-        public CreateProductService(IIdObjectFactory<BusinessEntities.Product> productFactory, IProductRepository productRepository, IUpdateProductService updateProductService)
+        public CreateProductService(IIdObjectFactory<Product> productFactory, IProductRepository productRepository)
         {
             _productFactory = productFactory;
             _productRepository = productRepository;
-            _updateProductService = updateProductService;
         }
 
-        public BusinessEntities.Product Create(Guid id, string name, decimal price, int quantity)
+        public Result<Product> Create(string name, decimal price, int quantity)
         {
-            var existing = _productRepository.Get(id);
-            if (existing != null)
-                return null;
+            var id = Guid.NewGuid();
+            if (_productRepository.Get(id) != null)
+                return Result<Product>.Fail($"Product with ID {id} already exists.");
 
             var product = _productFactory.Create(id);
-            _updateProductService.Update(product, name, price, quantity);
+
+            try
+            {
+                product.SetName(name);
+                product.SetPrice(price);
+                product.SetQuantity(quantity);
+            }
+            catch (Exception ex)
+            {
+                return Result<Product>.Fail(ex.Message);
+            }
+
             _productRepository.Save(product);
-            return product;
+            return Result<Product>.Ok(product);
         }
     }
 }

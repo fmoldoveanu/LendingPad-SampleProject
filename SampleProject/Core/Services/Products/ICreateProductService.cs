@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using BusinessEntities;
+using Common.Results;
 
 namespace Core.Services.Products
 {
     public interface ICreateProductService
     {
-        BusinessEntities.Product Create(Guid id, string name, decimal price, int quantity);
+        Result<Product> Create(string name, decimal price, int quantity);
     }
 }

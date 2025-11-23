@@ -6,8 +6,8 @@ namespace Core.Services.Orders
 {
     public interface IGetOrderService
     {
-        BusinessEntities.Order GetOrder(Guid id);
+        Order GetOrder(Guid id);
 
-        IEnumerable<BusinessEntities.Order> GetOrders(DateTime? orderDate = null, Guid? customerId = null, decimal totalAmount = 0);
+        IEnumerable<Order> GetOrders(DateTime? orderDate = null, Guid? customerId = null, decimal? totalAmount = null);
     }
 }

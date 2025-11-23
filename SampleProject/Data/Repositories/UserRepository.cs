@@ -4,14 +4,14 @@ using System.Linq;
 using BusinessEntities;
 using Common;
 using Data.Indexes;
-//using Raven.Client;
+using Raven.Client;
 
 namespace Data.Repositories
 {
-    [AutoRegister]
+    [AutoRegister(AutoRegisterTypes.Scope)]
     public class UserRepository : Repository<User>, IUserRepository
     {
-        /*
+   
         private readonly IDocumentSession _documentSession;
 
         public UserRepository(IDocumentSession documentSession) : base(documentSession)
@@ -59,7 +59,7 @@ namespace Data.Repositories
             base.DeleteAll<UsersListIndex>();
         }
     }
-    */
+    /*
         public IEnumerable<User> Get(UserTypes? userType = null, string name = null, string email = null)
         {
             var query = Store.Values.AsQueryable();
@@ -82,4 +82,5 @@ namespace Data.Repositories
             base.DeleteAll();
         }
     }
+    */
 }

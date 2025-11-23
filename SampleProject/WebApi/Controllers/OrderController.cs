@@ -25,80 +25,85 @@ namespace WebApi.Controllers
             _updateOrderService = updateOrderService;
         }
 
-        [Route("{orderId:guid}/create")]
+        // Create order (POST /orders)
         [HttpPost]
-        public HttpResponseMessage CreateOrder(Guid orderId, [FromBody] OrderModel model)
+        [Route("")]
+        public HttpResponseMessage CreateOrder([FromBody] OrderModel model)
         {
+            var result = _createOrderService.Create(model.OrderDate, model.CustomerId, model.TotalAmount);
 
-            var order = _createOrderService.Create(orderId, model.OrderDate, model.CustomerId, model.TotalAmount);
-            if (order == null) 
-            {
-                return Request.CreateResponse(HttpStatusCode.Conflict,
-                    $"Order with ID {orderId} already exists.");
-            }
-            return Found(new OrderData(order));
+            if (!result.Success)
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { errors = result.Errors });
+
+            return Request.CreateResponse(HttpStatusCode.Created, new OrderData(result.Value));
         }
 
-        [Route("{orderId:guid}/update")]
-        [HttpPost]
+        // Update order (PUT /orders/{id})
+        [HttpPut]
+        [Route("{orderId:guid}")]
         public HttpResponseMessage UpdateOrder(Guid orderId, [FromBody] OrderModel model)
         {
             var order = _getOrderService.GetOrder(orderId);
             if (order == null)
-            {
                 return DoesNotExist();
-            }
-            string ret = _updateOrderService.Update(order, model.OrderDate, model.CustomerId, model.TotalAmount);
-            if (ret.Length > 0)
-            {
-                return Request.CreateResponse(HttpStatusCode.BadRequest,
-                    ret);
-            }
-            return Found(new OrderData(order));
+
+            var result = _updateOrderService.Update(order, model.OrderDate, model.CustomerId, model.TotalAmount);
+
+            if (!result.Success)
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { errors = result.Errors });
+
+            return Request.CreateResponse(HttpStatusCode.OK, new OrderData(result.Value));
         }
 
-        [Route("{orderId:guid}/delete")]
+        // Delete order (DELETE /orders/{id})
         [HttpDelete]
+        [Route("{orderId:guid}")]
         public HttpResponseMessage DeleteOrder(Guid orderId)
         {
-            var order = _getOrderService.GetOrder(orderId);
-            if (order == null)
-            {
+            var result = _deleteOrderService.DeleteById(orderId);
+            if (!result.Success)
                 return DoesNotExist();
-            }
-            _deleteOrderService.Delete(order);
-            return Found();
+
+            return Request.CreateResponse(HttpStatusCode.NoContent);
         }
 
-        [Route("{orderId:guid}")]
+        // Get single order (GET /orders/{id})
         [HttpGet]
+        [Route("{orderId:guid}")]
         public HttpResponseMessage GetOrder(Guid orderId)
         {
             var order = _getOrderService.GetOrder(orderId);
-            if(order == null)
-            {
+            if (order == null)
                 return DoesNotExist();
-            }
-            return Found(new OrderData(order));
+
+            return Request.CreateResponse(HttpStatusCode.OK, new OrderData(order));
         }
 
-        [Route("list")]
+        // Get orders list (GET /orders/list?skip=0&take=50&customerId=...&totalAmount=...)
         [HttpGet]
-        public HttpResponseMessage GetOrders(int skip, int take, DateTime? orderDate = null, Guid? customerId = null, decimal? totalAmont = null)
+        [Route("list")]
+        public HttpResponseMessage GetOrders(int skip = 0, int take = 50, DateTime? orderDate = null, Guid? customerId = null, decimal? totalAmount = null)
         {
-            var users = _getOrderService.GetOrders(orderDate)
-                                       .Skip(skip).Take(take)
-                                       .Select(q => new OrderData(q))
-                                       .ToList();
-            return Found(users);
+            if (take > 100) take = 100;
+
+            var orders = _getOrderService.GetOrders(orderDate, customerId, totalAmount)
+                                         .Skip(skip).Take(take)
+                                         .Select(o => new OrderData(o))
+                                         .ToList();
+
+            return Request.CreateResponse(HttpStatusCode.OK, orders);
         }
 
-        [Route("clear")]
+        // Delete all orders (DELETE /orders/clear)
         [HttpDelete]
-        public HttpResponseMessage DeleteAllOrders()
+        [Route("clear")]
+        public HttpResponseMessage DeleteAllOrders([FromUri] bool confirm = false)
         {
+            if (!confirm)
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { error = "Confirmation required" });
+
             _deleteOrderService.DeleteAll();
-            return Found();
+            return Request.CreateResponse(HttpStatusCode.NoContent);
         }
     }
 }
