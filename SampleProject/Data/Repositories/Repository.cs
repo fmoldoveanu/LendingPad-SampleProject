@@ -10,7 +10,7 @@ using Raven.Client.Indexes;
 
 namespace Data.Repositories
 {
-    [AutoRegister]
+    //[AutoRegister]
     public class Repository<T> : IRepository<T> where T : IdObject
     {
         //protected static readonly ConcurrentDictionary<Guid, T> Store = new ConcurrentDictionary<Guid, T>();
@@ -26,7 +26,7 @@ namespace Data.Repositories
         public void Save(T entity)
         {
             _documentSession.Store(entity);
-            _documentSession.SaveChanges(); // commit to RavenDB
+            //_documentSession.SaveChanges(); // commit to RavenDB
         }
 
         public void Delete(T entity)

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using BusinessEntities;
 using Common;
+using Data.Repositories;
 using Raven.Client;
 using Raven.Client.Document;
 using Raven.Client.Indexes;
@@ -29,6 +30,8 @@ namespace Data
                                    session.Advanced.MaxNumberOfRequestsPerSession = 5000;
                                    return session;
                                }, lifestyle);
+
+            container.Register(typeof(IRepository<>), typeof(Repository<>), lifestyle);
         }
 
         private static IDocumentStore InitializeDocumentStore(Assembly assembly, bool createIndexes)

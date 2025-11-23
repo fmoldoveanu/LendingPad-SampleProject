@@ -8,7 +8,7 @@ using Raven.Client;
 
 namespace Data.Repositories
 {
-    [AutoRegister]
+    [AutoRegister(AutoRegisterTypes.Scope)]
     public class ProductRepository : Repository<Product>, IProductRepository
     {
         
